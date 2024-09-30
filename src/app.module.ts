@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { AdminModule } from './admin/admin.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -19,6 +20,9 @@ import { AdminModule } from './admin/admin.module';
       sync: { alter: true },
       synchronize: true,
       logging: false
+    }),
+    JwtModule.register({
+      global: true
     }),
     AdminModule
   ],

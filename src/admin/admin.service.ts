@@ -1,15 +1,18 @@
-import { BadRequestException, HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Admin } from './models/admin.model';
 import { compare, hash } from 'bcrypt';
 import { AdminSigninDto } from './dto/signin-admin.dto';
+import { JwtService } from '@nestjs/jwt';
+import { generateTokens } from 'src/utils/token';
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectModel(Admin) private adminModel: typeof Admin
+    @InjectModel(Admin) private adminModel: typeof Admin,
+    private jwtService: JwtService,
   ) { }
 
   async addSuperadmin(createAdminDto: CreateAdminDto): Promise<object> {
@@ -59,9 +62,13 @@ export class AdminService {
       if (!is_valid_password) {
         throw new BadRequestException('username or password incorrect');
       }
+      const payload = { id: admin.id, role: admin.role };
+      const { access_token, refresh_token } = await generateTokens(this.jwtService, payload);
       
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
+
+
 }
