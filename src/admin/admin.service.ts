@@ -7,6 +7,7 @@ import { compare, hash } from 'bcrypt';
 import { AdminSigninDto } from './dto/signin-admin.dto';
 import { JwtService } from '@nestjs/jwt';
 import { generateTokens } from 'src/utils/token';
+import { Response } from 'express';
 
 @Injectable()
 export class AdminService {
@@ -51,7 +52,7 @@ export class AdminService {
     }
   }
 
-  async signin(adminSigninDto: AdminSigninDto) {
+  async signin(adminSigninDto: AdminSigninDto, res: Response) {
     try {
       const { username, password } = adminSigninDto;
       const admin = await this.adminModel.findOne({ where: { username } });
@@ -64,11 +65,15 @@ export class AdminService {
       }
       const payload = { id: admin.id, role: admin.role };
       const { access_token, refresh_token } = await generateTokens(this.jwtService, payload);
-      
+      res.cookie('refresh_token', refresh_token);
+      return {
+        message: 'success',
+        token: access_token
+      }
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
-
-
+  
+  
 }
