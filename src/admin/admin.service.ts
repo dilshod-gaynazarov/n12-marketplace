@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -74,6 +74,28 @@ export class AdminService {
       throw new InternalServerErrorException(error);
     }
   }
-  
-  
+
+  async updateAccessTokenWithRefreshToken(id: number, refresh_token: string, res: Response) {
+    try {
+      const verified_token = await this.jwtService.verify(refresh_token, {
+        secret: process.env.REFRESH_TOKEN_KEY
+      });
+      if (!verified_token) {
+        throw new UnauthorizedException('Unauthorized token');
+      }
+      if (id != verified_token.id) {
+        throw new ForbiddenException('Forbidden admin')
+      }
+      const payload = { id: verified_token.id, role: verified_token.role };
+      const token = this.jwtService.sign(payload, {
+        secret: process.env.ACCESS_TOKEN_KEY,
+        expiresIn: process.env.ACCESS_TOKEN_TIME
+      });
+      return {
+        token
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
 }
