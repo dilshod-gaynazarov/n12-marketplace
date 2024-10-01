@@ -9,4 +9,4 @@ import { Admin } from './models/admin.model';
   controllers: [AdminController],
   providers: [AdminService],
 })
-export class AdminModule { }
+export class AdminModule {}

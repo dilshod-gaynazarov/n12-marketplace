@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
@@ -8,7 +17,7 @@ import { CookieGetter } from 'src/decorators/cookieGetter.decorator';
 
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) { }
+  constructor(private readonly adminService: AdminService) {}
 
   @Post('/superadmin')
   async addSuperadmin(@Body() createAdminDto: CreateAdminDto) {
@@ -21,7 +30,10 @@ export class AdminController {
   }
 
   @Post('/signin')
-  async signin(@Body() signinAdminDto: AdminSigninDto, @Res({ passthrough: true }) res: Response) {
+  async signin(
+    @Body() signinAdminDto: AdminSigninDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.adminService.signin(signinAdminDto, res);
   }
 
@@ -29,8 +41,8 @@ export class AdminController {
   async refreshToken(
     @Param('id') id: number,
     @CookieGetter('refresh_token') refresh_token: string,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ) {
-    return this.adminService.updateAccessTokenWithRefreshToken(id, refresh_token, res);
+    return this.adminService.refreshToken(id, refresh_token, res);
   }
 }

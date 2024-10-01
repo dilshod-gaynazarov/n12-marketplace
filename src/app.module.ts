@@ -7,7 +7,8 @@ import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env', isGlobal: true
+      envFilePath: '.env',
+      isGlobal: true,
     }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
@@ -19,12 +20,12 @@ import { JwtModule } from '@nestjs/jwt';
       autoLoadModels: true,
       sync: { alter: true },
       synchronize: true,
-      logging: false
+      logging: false,
     }),
     JwtModule.register({
-      global: true
+      global: true,
     }),
-    AdminModule
+    AdminModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

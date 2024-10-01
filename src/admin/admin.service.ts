@@ -1,4 +1,11 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -14,7 +21,7 @@ export class AdminService {
   constructor(
     @InjectModel(Admin) private adminModel: typeof Admin,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async addSuperadmin(createAdminDto: CreateAdminDto): Promise<object> {
     try {
@@ -23,12 +30,12 @@ export class AdminService {
         username: createAdminDto.username,
         hashed_password: hashed_password,
         email: createAdminDto.email,
-        role: 'superadmin'
+        role: 'superadmin',
       });
       return {
         message: 'success',
-        data: superadmin
-      }
+        data: superadmin,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -41,12 +48,12 @@ export class AdminService {
         username: createAdminDto.username,
         hashed_password: hashed_password,
         email: createAdminDto.email,
-        role: 'admin'
+        role: 'admin',
       });
       return {
         message: 'success',
-        data: admin
-      }
+        data: admin,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -64,36 +71,39 @@ export class AdminService {
         throw new BadRequestException('username or password incorrect');
       }
       const payload = { id: admin.id, role: admin.role };
-      const { access_token, refresh_token } = await generateTokens(this.jwtService, payload);
+      const { access_token, refresh_token } = await generateTokens(
+        this.jwtService,
+        payload,
+      );
       res.cookie('refresh_token', refresh_token);
       return {
         message: 'success',
-        token: access_token
-      }
+        token: access_token,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
-  async updateAccessTokenWithRefreshToken(id: number, refresh_token: string, res: Response) {
+  async refreshToken(id: number, refresh_token: string, res: Response) {
     try {
       const verified_token = await this.jwtService.verify(refresh_token, {
-        secret: process.env.REFRESH_TOKEN_KEY
+        secret: process.env.REFRESH_TOKEN_KEY,
       });
       if (!verified_token) {
         throw new UnauthorizedException('Unauthorized token');
       }
       if (id != verified_token.id) {
-        throw new ForbiddenException('Forbidden admin')
+        throw new ForbiddenException('Forbidden admin');
       }
       const payload = { id: verified_token.id, role: verified_token.role };
       const token = this.jwtService.sign(payload, {
         secret: process.env.ACCESS_TOKEN_KEY,
-        expiresIn: process.env.ACCESS_TOKEN_TIME
+        expiresIn: process.env.ACCESS_TOKEN_TIME,
       });
       return {
-        token
-      }
+        token,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
